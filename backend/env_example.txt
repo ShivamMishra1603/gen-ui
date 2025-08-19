@@ -1,0 +1,5 @@
+# Copy this file to .env and add your actual API key
+GOOGLE_API_KEY=your_google_gemini_api_key_here
+FLASK_ENV=development
+UI_GENERATION_PROMPT="You are an expert front-end web developer and UI/UX designer.
+Your task is to convert the provided hand-drawn wireframe image into a single, clean, and professional HTML file with embedded CSS, following modern layout and design principles."

@@ -1,0 +1,53 @@
+# Python bytecode files
+__pycache__/
+*.py[cod]
+
+backend/.venv/
+
+# Virtual environment
+venv/
+env/
+.venv/
+ENV/
+.env
+# Distribution / packaging
+*.egg
+*.egg-info/
+dist/
+build/
+*.tar.gz
+*.whl
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Test output
+pytest*.xml
+nosetests.xml
+coverage.xml
+*.cover
+*.hypothesis/
+
+# MyPy
+.mypy_cache/
+
+# Pylint
+pylint-report.txt
+pylint-*.log
+
+# Coverage directory used by tools like coverage.py
+.coverage
+.coverage.*
+
+# Pytest cache
+.pytest_cache/
+
+# Cython debug symbols
+cython_debug/
+
+frontend/node_modules
