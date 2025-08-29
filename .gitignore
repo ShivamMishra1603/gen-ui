@@ -22,6 +22,8 @@ build/
 .vscode/
 .idea/
 *.swp
+.DS_Store
+Thumbs.db
 
 # Jupyter Notebook
 .ipynb_checkpoints/
@@ -50,4 +52,39 @@ pylint-*.log
 # Cython debug symbols
 cython_debug/
 
-frontend/node_modules
+# Log files
+backend/logs/
+*.log
+logs/
+
+# Frontend
+frontend/node_modules/
+frontend/build/
+frontend/dist/
+frontend/.cache/
+*.tsbuildinfo
+
+# React specific
+.eslintcache
+
+# Environment files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.orig
+*~
+
+# OS generated files
+*.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

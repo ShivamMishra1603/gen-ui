@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
+import analytics from './utils/analytics';
 
 function App() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -17,6 +18,9 @@ function App() {
       setError('');
       setGeneratedCode('');
       setShowPreview(false);
+      
+      // Track file upload
+      analytics.trackFileUpload(file);
     }
   };
 
@@ -32,22 +36,34 @@ function App() {
       setError('');
       setGeneratedCode('');
       setShowPreview(false);
+      
+      // Track drag & drop upload
+      analytics.trackFileUpload(file);
+      analytics.trackEvent('file_drag_drop');
     }
   };
 
   const generateUI = async () => {
     if (!selectedFile) {
       setError('Please select an image file first');
+      analytics.trackEvent('generate_error', { reason: 'no_file' });
       return;
     }
 
     if (!apiKey.trim()) {
       setError('Please provide your Google AI API key');
+      analytics.trackEvent('generate_error', { reason: 'no_api_key' });
       return;
     }
 
+    const startTime = Date.now();
     setIsLoading(true);
     setError('');
+
+    analytics.trackEvent('generate_request_start', {
+      file_size: selectedFile.size,
+      file_type: selectedFile.type
+    });
 
     const formData = new FormData();
     formData.append('image', selectedFile);
@@ -60,14 +76,37 @@ function App() {
         },
       });
 
+      const duration = Date.now() - startTime;
+
       if (response.data.success) {
         setGeneratedCode(response.data.html_code);
         setShowPreview(true); // Show preview by default
+        
+        analytics.trackGenerateResponse(true, duration, {
+          code_length: response.data.html_code.length,
+          response_message: response.data.message
+        });
       } else {
         setError(response.data.error || 'Failed to generate UI');
+        analytics.trackGenerateResponse(false, duration, {
+          error: response.data.error || 'Failed to generate UI'
+        });
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'An error occurred while generating UI');
+      const duration = Date.now() - startTime;
+      const errorMessage = err.response?.data?.error || 'An error occurred while generating UI';
+      setError(errorMessage);
+      
+      analytics.trackError(err, { 
+        operation: 'generate_ui',
+        duration_ms: duration,
+        status_code: err.response?.status,
+        error_message: errorMessage
+      });
+      analytics.trackGenerateResponse(false, duration, {
+        error: errorMessage,
+        status_code: err.response?.status
+      });
     } finally {
       setIsLoading(false);
     }
@@ -83,6 +122,9 @@ function App() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    
+    // Track download
+    analytics.trackCodeDownload(generatedCode.length);
   };
 
   return (
@@ -110,7 +152,13 @@ function App() {
                   type="password"
                   placeholder="Enter your Google AI API key"
                   value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
+                  onChange={(e) => {
+                    setApiKey(e.target.value);
+                    if (e.target.value.trim() && !apiKey.trim()) {
+                      // Only track when user first enters a key (not every keystroke)
+                      analytics.trackApiKeyInput();
+                    }
+                  }}
                   className="api-key-input"
                 />
                 <p className="api-key-help">
@@ -181,7 +229,11 @@ function App() {
                     Download Code
                   </button>
                   <button
-                    onClick={() => setShowPreview(!showPreview)}
+                    onClick={() => {
+                      const newShowPreview = !showPreview;
+                      setShowPreview(newShowPreview);
+                      analytics.trackPreviewToggle(newShowPreview);
+                    }}
                     className="preview-btn"
                   >
                     {showPreview ? 'Show Code' : 'Show Preview'}
