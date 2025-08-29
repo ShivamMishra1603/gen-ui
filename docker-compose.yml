@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  # Backend Flask API
+  backend:
+    build: ./backend
+    container_name: genui-backend
+    ports:
+      - "5001:5001"  # Expose for direct access if needed
+    environment:
+      - FLASK_ENV=production
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - UI_GENERATION_PROMPT=${UI_GENERATION_PROMPT}
+    volumes:
+      - ./backend/logs:/app/logs  # Persist logs
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5001/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # Frontend React App with Nginx
+  frontend:
+    build: ./frontend
+    container_name: genui-frontend
+    ports:
+      - "80:80"  # Main application port
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  logs:
+    driver: local
+
+networks:
+  default:
+    name: genui-network

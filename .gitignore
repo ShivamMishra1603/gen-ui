@@ -88,3 +88,7 @@ frontend/.cache/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Docker
+.env
+docker-compose.override.yml
