@@ -70,7 +70,8 @@ function App() {
     formData.append('api_key', apiKey.trim());
 
     try {
-      const response = await axios.post('/generate-ui', formData, {
+      const apiUrl = process.env.REACT_APP_API_URL || '';
+      const response = await axios.post(`${apiUrl}/generate-ui`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

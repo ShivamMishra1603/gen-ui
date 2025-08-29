@@ -1,0 +1,16 @@
+services:
+  # Backend API Service
+  - type: web
+    name: genui-backend
+    runtime: python3
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: GOOGLE_API_KEY
+        sync: false  # Set this manually in Render dashboard
+      - key: UI_GENERATION_PROMPT
+        value: "You are an expert front-end web developer and UI/UX designer. Your task is to convert the provided hand-drawn wireframe image into a single, clean, and professional HTML file with embedded CSS, following modern layout and design principles."
+    healthCheckPath: /health
