@@ -8,6 +8,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPreview, setShowPreview] = useState(false);
+  const [apiKey, setApiKey] = useState('');
 
   const handleFileSelect = (event) => {
     const file = event.target.files[0];
@@ -40,11 +41,17 @@ function App() {
       return;
     }
 
+    if (!apiKey.trim()) {
+      setError('Please provide your Google AI API key');
+      return;
+    }
+
     setIsLoading(true);
     setError('');
 
     const formData = new FormData();
     formData.append('image', selectedFile);
+    formData.append('api_key', apiKey.trim());
 
     try {
       const response = await axios.post('/generate-ui', formData, {
@@ -97,6 +104,20 @@ function App() {
           {/* Left Column - Upload */}
           <div className="upload-column">
             <div className="upload-section">
+              <h2>API Key</h2>
+              <div className="api-key-section">
+                <input
+                  type="password"
+                  placeholder="Enter your Google AI API key"
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  className="api-key-input"
+                />
+                <p className="api-key-help">
+                  Don't have an API key? <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer">Get one from Google AI Studio</a>
+                </p>
+              </div>
+
               <h2>Upload Image</h2>
               <div
                 className="upload-area"
@@ -126,7 +147,7 @@ function App() {
 
               <button
                 onClick={generateUI}
-                disabled={!selectedFile || isLoading}
+                disabled={!selectedFile || !apiKey.trim() || isLoading}
                 className="generate-btn"
               >
                 {isLoading ? 'Generating...' : 'Generate UI Code'}

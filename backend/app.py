@@ -11,12 +11,10 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
-GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
-if not GOOGLE_API_KEY:
-    raise ValueError("GOOGLE_API_KEY not found in environment variables")
+# Optional fallback API key from environment
+FALLBACK_API_KEY = os.getenv('GOOGLE_API_KEY')
 
-genai.configure(api_key=GOOGLE_API_KEY)
-model = genai.GenerativeModel('gemini-2.0-flash')
+# Don't configure genai globally anymore - we'll do it per request
 
 UI_GENERATION_PROMPT = os.getenv('UI_GENERATION_PROMPT')
 if not UI_GENERATION_PROMPT:
@@ -36,6 +34,14 @@ def generate_ui():
         if file.filename == '':
             return jsonify({"error": "No file selected"}), 400
         
+        # Get API key from form data or use fallback
+        api_key = request.form.get('api_key')
+        if not api_key:
+            api_key = FALLBACK_API_KEY
+        
+        if not api_key:
+            return jsonify({"error": "API key is required. Please provide your Google AI API key or set up environment variables."}), 400
+        
         allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'bmp'}
         file_extension = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
         if file_extension not in allowed_extensions:
@@ -44,10 +50,22 @@ def generate_ui():
         image_bytes = file.read()
         img = PIL.Image.open(io.BytesIO(image_bytes))
         
-        print("🚀 Generating UI code with Gemini...")
-        response = model.generate_content([UI_GENERATION_PROMPT, img])
+        # Configure genai with the provided API key
+        try:
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel('gemini-2.0-flash')
+        except Exception as e:
+            return jsonify({"error": "Invalid API key. Please check your Google AI API key."}), 401
         
-        generated_code = response.text
+        print("🚀 Generating UI code with Gemini...")
+        try:
+            response = model.generate_content([UI_GENERATION_PROMPT, img])
+            generated_code = response.text
+        except Exception as e:
+            if "API_KEY_INVALID" in str(e) or "invalid" in str(e).lower():
+                return jsonify({"error": "Invalid API key. Please check your Google AI API key and try again."}), 401
+            else:
+                raise e
         
         if "```html" in generated_code:
             generated_code = generated_code.split("```html")[1].split("```")[0].strip()

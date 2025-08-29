@@ -98,6 +98,50 @@ body {
   letter-spacing: -0.025em;
 }
 
+/* API Key Section */
+.api-key-section {
+  margin-bottom: 2rem;
+}
+
+.api-key-input {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  background-color: var(--accent);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+}
+
+.api-key-input:focus {
+  outline: none;
+  border-color: var(--primary-dark);
+  box-shadow: 0 0 0 3px rgba(43, 45, 66, 0.1);
+}
+
+.api-key-input::placeholder {
+  color: var(--primary-medium);
+}
+
+.api-key-help {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.api-key-help a {
+  color: var(--primary-dark);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.api-key-help a:hover {
+  text-decoration: underline;
+}
+
 .upload-area {
   border: 2px dashed var(--primary-medium);
   border-radius: 8px;
